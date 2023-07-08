@@ -1253,6 +1253,7 @@ dependencies = [
  "shuttle-secrets",
  "shuttle-shared-db",
  "sqlx 0.7.0",
+ "thiserror",
  "tokio",
  "tracing",
 ]
