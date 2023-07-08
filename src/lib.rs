@@ -3,6 +3,7 @@ use poise::serenity_prelude as serenity;
 use sqlx::FromRow;
 
 pub mod commands;
+pub mod game;
 
 pub struct Data {
   pub player_db: PlayerDB,
