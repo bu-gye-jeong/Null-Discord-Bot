@@ -66,14 +66,15 @@ pub async fn start(
       .await?;
     return Ok(());
   }
+  ctx.say("게임을 시작합니다.").await?;
+  let path = &ctx.data().static_folder;
   let game = Game::new(registered_players)?;
-  game.draw("msg.png".to_string())?;
+  game.draw(path.join("fonts/SUITE-ExtraBold.otf"), path.join("msg.png"))?;
   let mut data_game = ctx.data().game.lock().await;
   *data_game = Some(game);
-  ctx.say("게임을 시작합니다.").await?;
   ctx
     .channel_id()
-    .send_files(ctx, vec!["msg.png"], |m| m.content(""))
+    .send_files(ctx, path.join("msg.png").to_str(), |m| m.content(""))
     .await?;
   Ok(())
 }

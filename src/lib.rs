@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Error;
 use futures::lock::Mutex;
 use poise::serenity_prelude as serenity;
@@ -10,6 +12,7 @@ pub mod game;
 pub struct Data {
   pub player_db: PlayerDB,
   pub game: Mutex<Option<game::Game>>,
+  pub static_folder: PathBuf,
 }
 pub type Context<'a> = poise::Context<'a, Data, Error>;
 

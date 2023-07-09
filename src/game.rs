@@ -56,13 +56,16 @@ impl Game {
     Ok(Game { field, players })
   }
 
-  pub fn draw(&self, file_path: String) -> Result<()> {
+  pub fn draw<P>(&self, font_path: P, save_path: P) -> Result<()>
+  where
+    P: AsRef<std::path::Path>,
+  {
     let mut dt = DrawTarget::new(7 * CELL_SIZE, 7 * CELL_SIZE);
     let white = Color::new(0xff, 0xdd, 0xdd, 0xdd);
     let gray = Color::new(0xff, 0xbb, 0xbb, 0xbb);
     let blue = Color::new(0xff, 0x32, 0x48, 0xa8);
     let red = Color::new(0xff, 0xc7, 0x47, 0x36);
-    let font = Font::from_path("fonts/SUITE-ExtraBold.otf", 0)?;
+    let font = Font::from_path(font_path, 0)?;
     for (i, row) in self.field.iter().enumerate() {
       for (j, cell) in row.iter().enumerate() {
         let color = match *cell {
@@ -105,7 +108,7 @@ impl Game {
       }
     }
 
-    dt.write_png(file_path).map_err(|e| e.into())
+    dt.write_png(save_path).map_err(|e| e.into())
   }
 }
 
@@ -119,19 +122,19 @@ mod tests {
     let game = Game::new(vec![
       Player {
         discord_id: "123123123".to_string(),
-        display_name: "뉴민".to_string(),
+        display_name: "Test1".to_string(),
       },
       Player {
         discord_id: "123123123".to_string(),
-        display_name: "부계정".to_string(),
+        display_name: "테스트2".to_string(),
       },
       Player {
         discord_id: "123123123".to_string(),
-        display_name: "Guraud".to_string(),
+        display_name: "TEST3".to_string(),
       },
     ])?;
     println!("{:#?}", game);
-    game.draw("wasans.png".to_string())?;
+    game.draw("static/fonts/SUITE-ExtraBold.otf", "static/wasans.png")?;
     Ok(())
   }
 }

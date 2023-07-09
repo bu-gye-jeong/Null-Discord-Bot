@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::{Context as _, Error, Result};
 use futures::lock::Mutex;
 use null_discord_bot::{commands, Data, PlayerDB};
@@ -6,7 +8,10 @@ use shuttle_poise::ShuttlePoise;
 use shuttle_secrets::SecretStore;
 
 #[shuttle_runtime::main]
-async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> ShuttlePoise<Data, Error> {
+async fn poise(
+  #[shuttle_secrets::Secrets] secret_store: SecretStore,
+  #[shuttle_static_folder::StaticFolder] static_folder: PathBuf,
+) -> ShuttlePoise<Data, Error> {
   let database_url = secret_store
     .get("DATABASE_URL")
     .context("'DATABASE_URL' was not found")?;
@@ -37,6 +42,7 @@ async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> Shuttle
         Ok(Data {
           player_db,
           game: Mutex::new(None),
+          static_folder,
         })
       })
     })
