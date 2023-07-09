@@ -1,4 +1,5 @@
 use anyhow::{Context as _, Error, Result};
+use futures::lock::Mutex;
 use null_discord_bot::{commands, Data, PlayerDB};
 use poise::serenity_prelude as serenity;
 use shuttle_poise::ShuttlePoise;
@@ -33,7 +34,10 @@ async fn poise(#[shuttle_secrets::Secrets] secret_store: SecretStore) -> Shuttle
         for id in guild_ids {
           poise::builtins::register_in_guild(ctx, &framework.options().commands, id).await?;
         }
-        Ok(Data { player_db })
+        Ok(Data {
+          player_db,
+          game: Mutex::new(None),
+        })
       })
     })
     .build()

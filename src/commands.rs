@@ -1,5 +1,6 @@
-use crate::{Context, Data, Player};
+use crate::{game::Game, Context, Data, Player};
 use anyhow::Result;
+use futures::StreamExt;
 use poise::serenity_prelude as serenity;
 
 /// 플레이어 등록
@@ -32,6 +33,51 @@ pub async fn who(ctx: Context<'_>, #[description = "누구"] user: serenity::Use
   Ok(())
 }
 
+/// 게임 시작
+#[poise::command(slash_command)]
+pub async fn start(
+  ctx: Context<'_>,
+  player1: serenity::User,
+  player2: serenity::User,
+  player3: serenity::User,
+  player4: Option<serenity::User>,
+) -> Result<()> {
+  let mut players = vec![player1, player2, player3];
+  if let Some(p4) = player4 {
+    players.push(p4);
+  };
+  let mut registered_players = vec![];
+  let mut unregistered_players = vec![];
+  for (i, result) in futures::stream::iter(&players)
+    .then(|p| async move { ctx.data().player_db.get_by_id(&p.id).await })
+    .collect::<Vec<_>>()
+    .await
+    .into_iter()
+    .enumerate()
+  {
+    match result {
+      Ok(p) => registered_players.push(p),
+      Err(_) => unregistered_players.push(&players[i].name),
+    }
+  }
+  if !unregistered_players.is_empty() {
+    ctx
+      .say(format!("미등록 사용자: {:?}", unregistered_players))
+      .await?;
+    return Ok(());
+  }
+  let game = Game::new(registered_players)?;
+  game.draw("msg.png".to_string())?;
+  let mut data_game = ctx.data().game.lock().await;
+  *data_game = Some(game);
+  ctx.say("게임을 시작합니다.").await?;
+  ctx
+    .channel_id()
+    .send_files(ctx, vec!["msg.png"], |m| m.content(""))
+    .await?;
+  Ok(())
+}
+
 pub fn commands() -> Vec<poise::Command<Data, anyhow::Error>> {
-  vec![register(), who()]
+  vec![register(), who(), start()]
 }

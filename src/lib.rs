@@ -1,12 +1,15 @@
 use anyhow::Error;
+use futures::lock::Mutex;
 use poise::serenity_prelude as serenity;
 use sqlx::FromRow;
 
 pub mod commands;
+pub mod draw_ext;
 pub mod game;
 
 pub struct Data {
   pub player_db: PlayerDB,
+  pub game: Mutex<Option<game::Game>>,
 }
 pub type Context<'a> = poise::Context<'a, Data, Error>;
 
