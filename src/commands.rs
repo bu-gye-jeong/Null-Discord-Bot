@@ -1,6 +1,6 @@
 use crate::{game::Game, Context, Data, Player};
 use anyhow::Result;
-use futures::future::join_all;
+use futures::StreamExt;
 use poise::serenity_prelude as serenity;
 
 /// 플레이어 등록
@@ -48,13 +48,12 @@ pub async fn start(
   };
   let mut registered_players = vec![];
   let mut unregistered_players = vec![];
-  for (i, result) in join_all(players.iter().map(|p| async move {
-    let res = ctx.data().player_db.get_by_id(&p.id).await;
-    return res;
-  }))
-  .await
-  .into_iter()
-  .enumerate()
+  for (i, result) in futures::stream::iter(&players)
+    .then(|p| async move { ctx.data().player_db.get_by_id(&p.id).await })
+    .collect::<Vec<_>>()
+    .await
+    .into_iter()
+    .enumerate()
   {
     match result {
       Ok(p) => registered_players.push(p),
