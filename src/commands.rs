@@ -18,7 +18,7 @@ pub async fn register(ctx: Context<'_>, #[description = "표시명"] name: Strin
     },
   };
 
-  ctx.say(response).await?;
+  ctx.send(|m| m.ephemeral(true).content(response)).await?;
   Ok(())
 }
 
@@ -66,7 +66,9 @@ pub async fn start(
       .await?;
     return Ok(());
   }
-  ctx.say("게임을 시작합니다.").await?;
+  ctx
+    .send(|m| m.ephemeral(true).content("게임을 시작합니다."))
+    .await?;
   let path = &ctx.data().static_folder;
   let game = Game::new(registered_players)?;
   game.draw(path.join("fonts/SUITE-ExtraBold.otf"), path.join("msg.png"))?;
